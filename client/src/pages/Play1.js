@@ -18,7 +18,7 @@ import { GameStateInfo } from "../components/game/GameStateInfo";
 import PokerCard from "../components/game/PokerCard";
 
 const Play1 = ({ history }) => {
-  const { socket } = useContext(socketContext);
+  const { socket, isPolling } = useContext(socketContext);
   const { openModal } = useContext(modalContext);
   const {
     messages,
@@ -38,15 +38,27 @@ const Play1 = ({ history }) => {
   const [bet, setBet] = useState(0);
 
   useEffect(() => {
-    !socket &&
-      openModal(
-        () => <Text>You lost connection game.</Text>,
-        "Lost Connection",
-        "Close",
-        () => history.push("/")
-      );
-    socket && joinTable(1);
-    return () => {};
+    let timer;
+    const checkAndOpenModal = () => {
+      const connected = (socket && socket.connected) || (window.socket && window.socket.connected) || isPolling;
+      if (!connected) {
+        openModal(
+          () => <Text>You lost connection game.</Text>,
+          "Lost Connection",
+          "Close",
+          () => history.push("/")
+        );
+      }
+    };
+
+    if ((socket && socket.connected) || isPolling) {
+      joinTable(1);
+    } else {
+      // wait for connection to establish before showing modal or joining
+      timer = setTimeout(checkAndOpenModal, 1000);
+    }
+
+    return () => clearTimeout(timer);
     // eslint-disable-next-line
   }, [socket]);
 

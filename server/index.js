@@ -38,7 +38,10 @@ const server = app.listen(config.PORT, () => {
 //  Handle real-time poker game logic with socket.io
 const io = socketio(server);
 
-io.on('connection', (socket) => gameSocket.init(socket, io));
+io.on('connection', (socket) => {
+  console.log('New socket connection:', socket.id);
+  gameSocket.init(socket, io);
+});
 
 // Error handling - close server
 // process.on('unhandledRejection', (err) => {
