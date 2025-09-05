@@ -27,16 +27,24 @@ const WebSocketProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
+    // Always attempt to establish socket connection on mount for guests and logged users
+    if (!socket) {
+      connect();
+    }
+    return () => {};
+    // eslint-disable-next-line
+  }, []);
+
+  // When login state changes, request lobby info if logged in
+  useEffect(() => {
     if (isLoggedIn) {
       const token = localStorage.token;
-      const webSocket = socket || connect();
-
-      token && webSocket && webSocket.emit(FETCH_LOBBY_INFO, token);
+      window.socket && token && window.socket.emit(FETCH_LOBBY_INFO, token);
     } else {
-      cleanUp();
+      // For guests, we keep the socket connection but clear user-specific data
+      setPlayers(null);
+      setTables(null);
     }
-    return () => cleanUp();
-    // eslint-disable-next-line
   }, [isLoggedIn]);
 
   function cleanUp() {
