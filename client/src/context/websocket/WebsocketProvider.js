@@ -57,7 +57,9 @@ const WebSocketProvider = ({ children }) => {
   }
 
   function connect() {
-    const socket = io(config.serverURI, {
+    // If serverURI is empty use same-origin connection (io() without URL). Otherwise pass the configured URI.
+    const url = config.serverURI || undefined;
+    const socket = io(url, {
       transports: ['websocket'],
       upgrade: false,
     });
