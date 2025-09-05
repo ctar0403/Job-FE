@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import authContext from '../auth/authContext';
 import SocketContext from './socketContext';
 import io from 'socket.io-client';
+import axios from 'axios';
 import {
   DISCONNECT,
   FETCH_LOBBY_INFO,
@@ -18,6 +19,8 @@ const WebSocketProvider = ({ children }) => {
 
   const [socket, setSocket] = useState(null);
   const [socketId, setSocketId] = useState(null);
+  const [isPolling, setIsPolling] = useState(false);
+  const pollingRef = useRef(null);
 
   useEffect(() => {
     window.addEventListener('beforeunload', cleanUp);
