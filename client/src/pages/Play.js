@@ -42,7 +42,7 @@ const Play = ({ history }) => {
   useEffect(() => {
     let timer;
     const checkAndOpenModal = () => {
-      const connected = (socket && socket.connected) || (window.socket && window.socket.connected);
+      const connected = (socket && socket.connected) || (window.socket && window.socket.connected) || isPolling;
       if (!connected) {
         openModal(
           () => <Text>You lost connection game.</Text>,
@@ -54,7 +54,7 @@ const Play = ({ history }) => {
     };
 
     // If not connected yet, wait a short time for socket to initialize
-    if (!(socket && socket.connected)) {
+    if (!((socket && socket.connected) || isPolling)) {
       timer = setTimeout(checkAndOpenModal, 1000);
     }
 
