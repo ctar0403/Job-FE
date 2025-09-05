@@ -18,7 +18,7 @@ import { GameStateInfo } from "../components/game/GameStateInfo";
 import PokerCard from "../components/game/PokerCard";
 
 const Play1 = ({ history }) => {
-  const { socket } = useContext(socketContext);
+  const { socket, isPolling } = useContext(socketContext);
   const { openModal } = useContext(modalContext);
   const {
     messages,
