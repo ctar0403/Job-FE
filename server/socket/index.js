@@ -122,12 +122,22 @@ const init = (socket, io) => {
         })
         await dbLog.save();
       } else {
-        // Guest connection: still provide current lobby info without user data
+        // Guest connection: create a temporary guest player and provide current lobby info
+        const guestId = `guest_${getRandomHexString(6)}`;
+        const guestName = `Guest${guestId.slice(-4)}`;
+        players[socket.id] = JSON.parse(JSON.stringify(new Player(
+          socket.id,
+          guestId,
+          guestName,
+          config.INITIAL_CHIPS_AMOUNT || 10000,
+        )));
+
         socket.emit(RECEIVE_LOBBY_INFO, {
           tables: getCurrentTables(),
           players: getCurrentPlayers(),
           socketId: socket.id,
         });
+        socket.broadcast.emit(PLAYERS_UPDATED, getCurrentPlayers());
       }
     } catch (error) {
       console.log(error, `---------${FETCH_LOBBY_INFO}`);
