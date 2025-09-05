@@ -64,12 +64,14 @@ const init = (socket, io) => {
     try {
       let user;
 
-      jwt.verify(token, config.JWT_SECRET, (err, decoded) => {
-        if (err) console.log(err);
-        else {
-          user = decoded.user;
-        }
-      });
+      if (token) {
+        jwt.verify(token, config.JWT_SECRET, (err, decoded) => {
+          if (err) console.log(err);
+          else {
+            user = decoded.user;
+          }
+        });
+      }
 
       if (user) {
         const found = Object.values(players).find((player) => {
@@ -94,7 +96,7 @@ const init = (socket, io) => {
           user.name,
           user.chipsAmount,
         )));
-          
+
         var dbPlayer = new DBPlayer({
           socketId: socket.id,
           id: user._id,
@@ -119,6 +121,13 @@ const init = (socket, io) => {
           tableData:"",
         })
         await dbLog.save();
+      } else {
+        // Guest connection: still provide current lobby info without user data
+        socket.emit(RECEIVE_LOBBY_INFO, {
+          tables: getCurrentTables(),
+          players: getCurrentPlayers(),
+          socketId: socket.id,
+        });
       }
     } catch (error) {
       console.log(error, `---------${FETCH_LOBBY_INFO}`);
