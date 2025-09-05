@@ -29,7 +29,10 @@ const WebSocketProvider = ({ children }) => {
   useEffect(() => {
     // Always attempt to establish socket connection on mount for guests and logged users
     if (!socket) {
-      connect();
+      const s = connect();
+      // Ask server for current lobby info for guests as well
+      const token = localStorage.token;
+      s && s.emit(FETCH_LOBBY_INFO, token);
     }
     return () => {};
     // eslint-disable-next-line
@@ -44,6 +47,8 @@ const WebSocketProvider = ({ children }) => {
       // For guests, we keep the socket connection but clear user-specific data
       setPlayers(null);
       setTables(null);
+      // Also request lobby info as a guest when user logs out
+      window.socket && window.socket.emit(FETCH_LOBBY_INFO, null);
     }
   }, [isLoggedIn]);
 
