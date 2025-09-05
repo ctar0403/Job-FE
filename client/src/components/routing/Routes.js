@@ -52,9 +52,9 @@ const Routes = ({ chipsAmount, setChipsAmount, setIsLoading }) => {
                 />
                 );
               })}
-      <ProtectedRoute path="/play" component={Play} />
+      <Route path="/play" component={Play} />
       {/* <ProtectedRoute path="/gamerooms" component={GameRooms} /> */}
-      <ProtectedRoute path="/play1" component={Play1} />
+      <Route path="/play1" component={Play1} />
       <Route component={NotFoundPage} />
     </Switch>
   );
