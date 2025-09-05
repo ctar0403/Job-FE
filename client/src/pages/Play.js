@@ -19,7 +19,7 @@ import PokerCard from "../components/game/PokerCard";
 // import tableContext from "../context/table/tableContext";
 
 const Play = ({ history }) => {
-  const { socket } = useContext(socketContext);
+  const { socket, isPolling } = useContext(socketContext);
   const { openModal } = useContext(modalContext);
   const {
     messages,
