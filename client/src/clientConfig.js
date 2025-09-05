@@ -1,11 +1,8 @@
 const config = {
   isProduction: process.env.NODE_ENV === "production",
-  contentfulSpaceId: process.env.REACT_APP_CONTENTFUL_SPACE_ID,
-  contentfulAccessToken: process.env.REACT_APP_CONTENTFUL_ACCESS_TOKEN,
-  googleAnalyticsTrackingId: process.env.REACT_APP_GOOGLE_ANALYTICS_TRACKING_ID,
-  // If REACT_APP_SERVER_URI is provided it will be used; otherwise default to current host and port 5000
+  // Use explicit REACT_APP_SERVER_URI if provided (e.g., production); in development prefer same-origin so CRA proxy can forward to backend
   serverURI:
-    process.env.REACT_APP_SERVER_URI || `http://${window.location.hostname}:5000`,
+    process.env.REACT_APP_SERVER_URI || (process.env.NODE_ENV === 'production' ? window.location.origin : ''),
 };
 
 export default config;
