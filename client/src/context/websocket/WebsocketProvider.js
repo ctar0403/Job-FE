@@ -62,6 +62,32 @@ const WebSocketProvider = ({ children }) => {
     setSocketId(null);
     setPlayers(null);
     setTables(null);
+    stopPolling();
+  }
+
+  function startPolling() {
+    if (pollingRef.current) return;
+    setIsPolling(true);
+    const fetch = async () => {
+      try {
+        const res = await axios.get('/api/currentTables');
+        const tables = res.data;
+        setTables(tables);
+      } catch (err) {
+        console.debug('Polling error', err.message || err);
+      }
+    };
+    // initial fetch
+    fetch();
+    pollingRef.current = setInterval(fetch, 3000);
+  }
+
+  function stopPolling() {
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
+      pollingRef.current = null;
+    }
+    setIsPolling(false);
   }
 
   function connect() {
@@ -69,8 +95,26 @@ const WebSocketProvider = ({ children }) => {
     const url = config.serverURI || undefined;
     const socket = io(url, {
       transports: ['websocket'],
-      upgrade: false,
+      upgrade: true,
     });
+
+    socket.on('connect', () => {
+      console.log('socket connected', socket.id);
+      stopPolling();
+    });
+
+    socket.on('connect_error', (err) => {
+      console.warn('socket connect_error', err && err.message);
+      // start polling fallback if socket cannot connect
+      startPolling();
+    });
+
+    socket.on('disconnect', (reason) => {
+      console.warn('socket disconnected', reason);
+      // fallback to polling
+      startPolling();
+    });
+
     registerCallbacks(socket);
     setSocket(socket);
     window.socket = socket;
@@ -97,7 +141,7 @@ const WebSocketProvider = ({ children }) => {
   }
 
   return (
-    <SocketContext.Provider value={{ socket, socketId, cleanUp }}>
+    <SocketContext.Provider value={{ socket, socketId, cleanUp, isPolling }}>
       {children}
     </SocketContext.Provider>
   );
